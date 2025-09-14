@@ -20,7 +20,7 @@
   [data-theme="light"]{ --bg:#f7f8fb; --card:#ffffff; --text:#0f172a; --muted:#6b7280; --border:#e5e7eb; --brand:#0ea5e9 }
 
   *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--text);font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial; line-height:1.35}
   header{
     position:sticky;top:0;z-index:20;border-bottom:1px solid var(--border);
     background:linear-gradient(180deg, rgba(14,165,233,.16), transparent), color-mix(in oklab, var(--card) 80%, transparent);
@@ -50,13 +50,18 @@
   .chip{border:1px solid var(--border);border-radius:999px;padding:7px 13px;font-size:13px;background:var(--card);cursor:pointer;transition:.18s}
   .chip:hover{box-shadow:0 4px 10px rgba(2,6,23,.06)}
   .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
+
   .list{display:grid;gap:12px}
   .item{
-    display:grid;grid-template-columns:1fr;gap:12px;align-items:center;
+    display:grid;grid-template-columns:1fr;gap:12px;align-items:start;
     border:1px solid var(--border);border-radius:16px;padding:14px;
     background:linear-gradient(180deg, rgba(255,255,255,.03), transparent);
   }
-  @media (min-width:820px){ .item{grid-template-columns:minmax(0,1.2fr) 180px 150px 190px 180px} }
+  .item > *{min-width:0;} /* evita superposición en CSS Grid */
+  @media (min-width:820px){
+    .item{grid-template-columns:minmax(0,1.2fr) 180px 150px 190px 180px}
+  }
+
   .muted{color:var(--muted)}
   .badge{display:inline-block;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid var(--border)}
   .tone-green{background:color-mix(in oklab, var(--ok) 18%, transparent); color:var(--ok); border-color:color-mix(in oklab, var(--ok) 45%, transparent)}
@@ -162,7 +167,7 @@
 
 <script>
 /* ===== Estado & utilidades ===== */
-const LSK="tracker-parciales-tps-pretty-v6";
+const LSK="tracker-parciales-tps-pretty-v7";
 const Estado={PENDIENTE:"pendiente", ENTREGADO:"entregado", CORREGIDO:"corregido"};
 const $=s=>document.querySelector(s);
 
@@ -222,7 +227,7 @@ function renderList(){
     const calCls=item.calif ? ("calif "+item.calif) : "calif";
     el.innerHTML = `
       <div>
-        <div style="display:flex;gap:8px;align-items:center">
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <span class="badge ${tone}">${item.estado}</span>
           <span class="note">${escapeHtml(item.titulo)}</span>
         </div>
@@ -325,3 +330,4 @@ render();
 </script>
 </body>
 </html>
+
