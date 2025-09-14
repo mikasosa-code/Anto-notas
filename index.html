@@ -4,330 +4,300 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Tracker de Parciales y TPs</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#0ea5e9">
+<meta name="theme-color" content="#6C5CE7">
 <style>
   :root{
-    --bg:#f7f8fb; --card:#ffffff; --text:#0f172a; --muted:#6b7280; --border:#e5e7eb;
-    --brand:#0ea5e9; --ok:#16a34a; --bad:#dc2626; --info:#2563eb; --warn:#f59e0b;
-    --radius:18px; --shadow:0 16px 40px rgba(2,6,23,.08), 0 2px 10px rgba(2,6,23,.06);
+    --bg:#f7f7fb; --card:#ffffff; --ink:#1b1c21; --muted:#6b7280; --border:#e9e9f2;
+    --brand:#6C5CE7; --ok:#10b981; --bad:#ef4444; --accent:#ffd166;
+    --r:18px; --shadow:0 12px 28px rgba(17,24,39,.06);
   }
   @media (prefers-color-scheme: dark){
-    :root{ --bg:#0b1020; --card:#0f172a; --text:#e5e7eb; --muted:#9aa4b2; --border:#1f2a44; --brand:#22c1f1 }
+    :root{ --bg:#0f1221; --card:#14172a; --ink:#eef1ff; --muted:#a7b0c2; --border:#242a44; --brand:#8f84ff; --accent:#f4c430 }
   }
-  [data-theme="dark"]{ --bg:#0b1020; --card:#0f172a; --text:#e5e7eb; --muted:#9aa4b2; --border:#1f2a44; --brand:#22c1f1 }
-  [data-theme="light"]{ --bg:#f7f8fb; --card:#ffffff; --text:#0f172a; --muted:#6b7280; --border:#e5e7eb; --brand:#0ea5e9 }
 
   *{box-sizing:border-box}
-  html,body{margin:0;background:var(--bg);color:var(--text);font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial; line-height:1.35}
-  header{
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  /* Top bar */
+  .top{
     position:sticky;top:0;z-index:20;border-bottom:1px solid var(--border);
-    background:linear-gradient(180deg, rgba(14,165,233,.16), transparent), color-mix(in oklab, var(--card) 80%, transparent);
-    backdrop-filter:saturate(140%) blur(10px);
+    background:linear-gradient(180deg, rgba(108,92,231,.10), transparent), var(--card);
+    backdrop-filter:saturate(130%) blur(6px);
   }
   .wrap{max-width:1100px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-  h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.3px;display:flex;gap:10px;align-items:center}
-  h1 .dot{width:10px;height:10px;border-radius:999px;background:var(--brand);box-shadow:0 0 0 4px color-mix(in oklab, var(--brand) 28%, transparent)}
-  .row-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-  .btn{appearance:none;border:1px solid var(--border);background:var(--card);color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;transition:.18s;font-weight:600}
-  .btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(2,6,23,.08)}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:14px;height:14px;border-radius:50%;background:var(--brand);box-shadow:0 0 0 6px color-mix(in oklab, var(--brand) 25%, transparent)}
+  h1{margin:0;font-size:20px;font-weight:800;letter-spacing:.2px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .btn{appearance:none;border:1px solid var(--border);background:var(--card);color:var(--ink);padding:10px 16px;border-radius:14px;cursor:pointer;transition:.18s;font-weight:700}
+  .btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
   .btn:active{transform:translateY(0)}
-  .btn.brand{background:var(--brand);border-color:var(--brand);color:#fff}
-  .filelbl{display:inline-flex;align-items:center;gap:.5rem}
-  .toggle{border:1px solid var(--border);background:var(--card);padding:8px 12px;border-radius:999px}
-  .toggle button{border:none;background:none;color:var(--muted);font-weight:700;cursor:pointer}
-  .toggle button.active{color:var(--brand)}
+  .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .chip{border:1px solid var(--border);background:var(--card);padding:8px 14px;border-radius:999px;font-weight:600;cursor:pointer}
+  .chip.active{background:var(--ink);color:var(--card);border-color:var(--ink)}
+  /* Layout */
   .container{max-width:1100px;margin:0 auto;padding:18px 16px}
-  .layout{display:grid;grid-template-columns:1fr;gap:16px}
-  @media (min-width:980px){ .layout{grid-template-columns:340px 1fr} }
-  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
-  .h2{margin:0 0 12px 0;font-size:16px;font-weight:800;letter-spacing:.2px}
-  .label{font-size:12px;font-weight:800;letter-spacing:.25px;color:var(--muted);text-transform:uppercase}
-  .input,.select{width:100%;margin-top:6px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:#fff0;color:var(--text)}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px}
+  @media(min-width:980px){.grid{grid-template-columns:340px 1fr}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+  .title{margin:0 0 12px 0;font-size:16px;font-weight:800}
+  .label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.2px;text-transform:uppercase}
+  .input,.select{width:100%;margin-top:6px;padding:12px 14px;border:1px solid var(--border);border-radius:12px;background:#fff0;color:var(--ink)}
   .input:focus,.select:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in oklab, var(--brand) 25%, transparent)}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-  .chip{border:1px solid var(--border);border-radius:999px;padding:7px 13px;font-size:13px;background:var(--card);cursor:pointer;transition:.18s}
-  .chip:hover{box-shadow:0 4px 10px rgba(2,6,23,.06)}
-  .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
 
-  .list{display:grid;gap:12px}
-  .item{
-    display:grid;grid-template-columns:1fr;gap:12px;align-items:start;
-    border:1px solid var(--border);border-radius:16px;padding:14px;
-    background:linear-gradient(180deg, rgba(255,255,255,.03), transparent);
-  }
-  .item > *{min-width:0;} /* evita superposición en CSS Grid */
-  @media (min-width:820px){
-    .item{grid-template-columns:minmax(0,1.2fr) 180px 150px 190px 180px}
+  /* Pills materias */
+  #chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+
+  /* Tabla responsive */
+  .table{width:100%;border-collapse:separate;border-spacing:0 10px}
+  .th{font-size:12px;color:var(--muted);text-transform:uppercase;text-align:left;padding:0 10px}
+  .row{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+  .cell{padding:14px 12px}
+  .badge{display:inline-block;padding:5px 10px;border-radius:10px;font-weight:800;border:1px solid var(--border)}
+  .tone-blue{background:color-mix(in oklab, var(--brand) 18%, transparent);border-color:color-mix(in oklab, var(--brand) 45%, transparent)}
+  .tone-green{background:color-mix(in oklab, var(--ok) 18%, transparent);border-color:color-mix(in oklab, var(--ok) 45%, transparent)}
+  .tone-amber{background:color-mix(in oklab, var(--accent) 28%, transparent);border-color:color-mix(in oklab, var(--accent) 55%, transparent)}
+  .tone-red{background:color-mix(in oklab, var(--bad) 18%, transparent);border-color:color-mix(in oklab, var(--bad) 45%, transparent)}
+  .ok{color:var(--ok);font-weight:800}
+  .bad{color:var(--bad);font-weight:800}
+
+  /* Responsive stack */
+  @media(max-width:720px){
+    .th.hide-m,.cell.hide-m{display:none}
+    .table{border-spacing:0 8px}
+    .cell{padding:12px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .row .cell:first-child{grid-column:1/-1}
   }
 
-  .muted{color:var(--muted)}
-  .badge{display:inline-block;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid var(--border)}
-  .tone-green{background:color-mix(in oklab, var(--ok) 18%, transparent); color:var(--ok); border-color:color-mix(in oklab, var(--ok) 45%, transparent)}
-  .tone-blue{background:color-mix(in oklab, var(--info) 18%, transparent); color:var(--info); border-color:color-mix(in oklab, var(--info) 45%, transparent)}
-  .tone-amber{background:color-mix(in oklab, var(--warn) 22%, transparent); color:#92400e; border-color:color-mix(in oklab, var(--warn) 45%, transparent)}
-  .tone-red{background:color-mix(in oklab, var(--bad) 18%, transparent); color:var(--bad); border-color:color-mix(in oklab, var(--bad) 45%, transparent)}
-  .calif{font-weight:900}
-  .calif.aprobado{color:var(--ok)}
-  .calif.desaprobado{color:var(--bad)}
-  .right{display:flex;justify-content:flex-end;margin-top:8px}
-  .note{font-weight:800}
+  /* Toast */
+  .toast{position:fixed;inset:auto 16px 16px auto;background:var(--ink);color:var(--card);
+    padding:10px 14px;border-radius:12px;font-weight:700;opacity:0;transform:translateY(10px);
+    transition:.25s;pointer-events:none}
+  .toast.show{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
-  <header>
+  <div class="top">
     <div class="wrap">
-      <h1><span class="dot"></span> Tracker de Parciales y TPs</h1>
-      <div class="row-actions">
-        <div class="toggle" title="Tema">
-          <button id="btnLight">Claro</button> ·
-          <button id="btnDark">Oscuro</button>
-        </div>
-        <button id="btnBackup" class="btn">💾 Guardar (descargar)</button>
-        <label class="btn filelbl">⤴️ Restaurar
-          <input id="fileImport" type="file" accept="application/json" hidden>
-        </label>
+      <div class="brand"><span class="logo"></span><h1>Tracker de Parciales y TPs</h1></div>
+      <div class="actions">
+        <button id="btnLight" class="btn">Claro</button>
+        <button id="btnDark" class="btn">Oscuro</button>
+        <button id="btnGuardar" class="btn primary">Guardar cambios</button>
       </div>
     </div>
-  </header>
+  </div>
 
   <main class="container">
-    <div class="layout">
+    <div class="grid">
+      <!-- Col izquierda -->
       <aside class="card">
-        <div class="h2">Materias</div>
-        <div class="label">Nueva materia</div>
-        <div style="display:grid;grid-template-columns:1fr auto;gap:10px;margin-top:6px">
-          <input id="newMateriaInput" class="input" placeholder="Ej: Matemática">
-          <button id="btnCrearMateria" class="btn brand">Crear</button>
+        <p class="title">Materias</p>
+        <label class="label">Nueva materia</label>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:10px">
+          <input id="materiaNueva" class="input" placeholder="Ej: Matemática">
+          <button id="btnCrearMateria" class="btn">Crear</button>
         </div>
 
-        <div id="chipsMaterias" class="chips" style="margin-top:12px"></div>
+        <div id="chips"></div>
 
-        <div id="editMateriaBox" style="display:none;margin-top:14px">
-          <div class="label">Editar</div>
+        <div id="editBox" style="display:none;margin-top:14px">
+          <label class="label">Editar</label>
           <div style="display:grid;grid-template-columns:1fr auto auto;gap:8px;margin-top:6px">
-            <input id="editMateriaInput" class="input" placeholder="Renombrar materia">
-            <button id="btnRenombrarMateria" class="btn">Renombrar</button>
-            <button id="btnBorrarMateria" class="btn" style="border-color:#fecaca;color:#b91c1c">Borrar</button>
+            <input id="materiaEdit" class="input" placeholder="Renombrar">
+            <button id="btnRenombrar" class="btn">Renombrar</button>
+            <button id="btnBorrar" class="btn" style="border-color:#ffd4d4;color:#c24141">Borrar</button>
           </div>
         </div>
       </aside>
 
-      <section class="col">
-        <div id="form" class="card">
-          <div class="h2">Agregar parcial / TP</div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-            <div>
-              <div class="label">Materia</div>
-              <select id="itemMateria" class="select"></select>
-            </div>
-            <div>
-              <div class="label">Título</div>
-              <input id="itemTitulo" class="input" placeholder="Ej: Parcial 1">
-            </div>
-            <div>
-              <div class="label">Tipo</div>
-              <select id="itemTipo" class="select"><option>Parcial</option><option>TP</option><option>Otro</option></select>
-            </div>
-            <div>
-              <div class="label">Fecha</div>
-              <input id="itemFecha" type="date" class="input">
-            </div>
-            <div>
-              <div class="label">Calificación</div>
-              <select id="itemCalif" class="select">
-                <option value="">—</option>
-                <option value="aprobado">Aprobado</option>
-                <option value="desaprobado">Desaprobado</option>
-              </select>
-            </div>
-            <div>
-              <div class="label">Estado</div>
-              <select id="itemEstado" class="select">
-                <option value="pendiente">Pendiente</option>
-                <option value="entregado">Entregado</option>
-                <option value="corregido">Corregido</option>
-              </select>
-            </div>
-          </div>
-          <div class="right"><button id="btnAgregar" class="btn brand">Agregar</button></div>
+      <!-- Col derecha -->
+      <section class="card">
+        <p class="title">Agregar parcial / TP</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+          <div><label class="label">Materia</label><select id="itMateria" class="select"></select></div>
+          <div><label class="label">Título</label><input id="itTitulo" class="input" placeholder="Ej: Parcial 1"></div>
+          <div><label class="label">Tipo</label><select id="itTipo" class="select"><option>Parcial</option><option>TP</option><option>Otro</option></select></div>
+          <div><label class="label">Fecha</label><input id="itFecha" type="date" class="input"></div>
+          <div><label class="label">Calificación</label><select id="itCalif" class="select"><option value="">—</option><option value="aprobado">Aprobado</option><option value="desaprobado">Desaprobado</option></select></div>
+          <div><label class="label">Estado</label><select id="itEstado" class="select"><option value="pendiente">Pendiente</option><option value="entregado">Entregado</option><option value="corregido">Corregido</option></select></div>
         </div>
-
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-            <div class="h2" style="margin:0">Listado</div>
-            <div id="contador" class="muted"></div>
-          </div>
-          <div id="lista" class="list"></div>
+        <div style="display:flex;justify-content:flex-end;margin-top:10px">
+          <button id="btnAgregar" class="btn">Agregar</button>
         </div>
       </section>
     </div>
+
+    <section class="card" style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <p class="title" style="margin:0">Listado</p>
+        <div id="contador" class="label" style="text-transform:none"></div>
+      </div>
+
+      <div class="table">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:6px;margin:0 0 6px 0">
+          <div class="th">Título • Materia • Tipo</div>
+          <div class="th">Fecha</div>
+          <div class="th hide-m">Calificación</div>
+          <div class="th">Estado</div>
+          <div class="th">Resultado</div>
+        </div>
+        <div id="lista"></div>
+      </div>
+    </section>
   </main>
 
+  <div id="toast" class="toast">Guardado ✅</div>
+
 <script>
-/* ===== Estado & utilidades ===== */
-const LSK="tracker-parciales-tps-pretty-v7";
-const Estado={PENDIENTE:"pendiente", ENTREGADO:"entregado", CORREGIDO:"corregido"};
+/* ===== Estado ===== */
+const LSK="tracker-ui-nuevo-v1";
 const $=s=>document.querySelector(s);
-
 const state={materias:[], items:[], ui:{materiaActiva:"all"}};
+function uid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);}
 
-function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
-function save(){ try{ localStorage.setItem(LSK, JSON.stringify({materias:state.materias, items:state.items})); }catch{} }
-function load(){ try{ const raw=localStorage.getItem(LSK); if(raw){ const d=JSON.parse(raw); if(d.materias&&d.items){ state.materias=d.materias; state.items=d.items; }}}catch{} }
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]||ch)); }
-function getMateria(id){ return state.materias.find(m=>m.id===id); }
-function badgeTone(item){
-  const today=new Date(); today.setHours(0,0,0,0);
-  const fecha=new Date(item.fechaISO+"T00:00:00");
-  const vencida=fecha<today;
-  if(item.estado===Estado.CORREGIDO) return "tone-green";
-  if(item.estado===Estado.ENTREGADO) return "tone-blue";
-  return vencida ? "tone-red" : "tone-amber";
+/* ===== Persistencia manual ===== */
+function save(){ localStorage.setItem(LSK, JSON.stringify({materias:state.materias, items:state.items})); }
+function load(){
+  try{ const raw=localStorage.getItem(LSK); if(raw){ const d=JSON.parse(raw); state.materias=d.materias||[]; state.items=d.items||[]; } }
+  catch{}
 }
+function toast(msg="Guardado ✅"){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 1800); }
 
 /* ===== Render ===== */
-function renderChips(){
-  const box=$("#chipsMaterias"); box.innerHTML="";
-  const mk=(label, active, onClick)=>{
-    const b=document.createElement("button");
-    b.className="chip"+(active?" active":""); b.textContent=label; b.onclick=onClick; return b;
-  };
-  box.appendChild(mk("Todas", state.ui.materiaActiva==="all", ()=>{ state.ui.materiaActiva="all"; render(); }));
-  state.materias.forEach(m=> box.appendChild(mk(m.nombre, state.ui.materiaActiva===m.id, ()=>{ state.ui.materiaActiva=m.id; render(); })));
-  const editBox=$("#editMateriaBox");
-  if(state.ui.materiaActiva!=="all"){
-    editBox.style.display="block";
-    $("#editMateriaInput").value = (getMateria(state.ui.materiaActiva)||{}).nombre || "";
-  } else editBox.style.display="none";
+function chip(label,active,on){const b=document.createElement("button");b.className="chip"+(active?" active":"");b.textContent=label;b.onclick=on;return b;}
+function getMateria(id){return state.materias.find(m=>m.id===id)}
+function tone(item){
+  if(item.estado==="corregido") return "tone-green";
+  if(item.estado==="entregado") return "tone-blue";
+  return "tone-amber";
 }
-function renderMateriaSelect(){
-  const sel=$("#itemMateria"); sel.innerHTML="";
-  if(state.materias.length===0){
-    const opt=document.createElement("option"); opt.value=""; opt.textContent="— Primero creá una materia —"; sel.appendChild(opt); sel.disabled=true;
-  }else{
+function renderMaterias(){
+  const box=$("#chips"); box.innerHTML="";
+  box.appendChild(chip("Todas", state.ui.materiaActiva==="all", ()=>{state.ui.materiaActiva="all"; render()}));
+  state.materias.forEach(m=> box.appendChild(chip(m.nombre, state.ui.materiaActiva===m.id, ()=>{state.ui.materiaActiva=m.id; render()})));
+  const edit=$("#editBox");
+  if(state.ui.materiaActiva!=="all"){ edit.style.display="block"; $("#materiaEdit").value=getMateria(state.ui.materiaActiva)?.nombre||""; }
+  else edit.style.display="none";
+}
+function renderSelect(){
+  const sel=$("#itMateria"); sel.innerHTML="";
+  if(!state.materias.length){ sel.disabled=true; sel.innerHTML='<option>— Primero creá una materia —</option>'; }
+  else{
     sel.disabled=false;
-    state.materias.forEach(m=>{ const o=document.createElement("option"); o.value=m.id; o.textContent=m.nombre; sel.appendChild(o); });
+    state.materias.forEach(m=>{const o=document.createElement("option");o.value=m.id;o.textContent=m.nombre;sel.appendChild(o);});
     if(state.ui.materiaActiva!=="all") sel.value=state.ui.materiaActiva;
   }
 }
-function renderList(){
-  const list=$("#lista"), counter=$("#contador"); list.innerHTML="";
+function renderLista(){
+  const wrap=$("#lista"); wrap.innerHTML="";
+  const cnt=$("#contador");
   let arr=state.items.slice();
   if(state.ui.materiaActiva!=="all") arr=arr.filter(i=>i.materiaId===state.ui.materiaActiva);
-  counter.textContent = arr.length + " ítem(s)";
-  if(!arr.length){ list.innerHTML = '<div class="muted" style="text-align:center;padding:24px 8px">No hay ítems aún.</div>'; return; }
+  cnt.textContent = arr.length+" ítem(s)";
+
+  if(!arr.length){ wrap.innerHTML='<div class="label" style="text-transform:none;color:var(--muted)">No hay ítems aún.</div>'; return; }
+
   arr.sort((a,b)=> new Date(a.fechaISO)-new Date(b.fechaISO));
-  arr.forEach(item=>{
-    const el=document.createElement("div"); el.className="item";
-    const fecha=new Date(item.fechaISO+"T00:00:00");
-    const tone=badgeTone(item);
-    const calTxt=item.calif ? (item.calif==="aprobado"?"Aprobado":"Desaprobado") : "—";
-    const calCls=item.calif ? ("calif "+item.calif) : "calif";
-    el.innerHTML = `
-      <div>
+  arr.forEach(it=>{
+    const tr=document.createElement("div");
+    tr.className="row";
+    tr.style.display="grid";
+    tr.style.gridTemplateColumns="2fr 1fr 1fr 1fr 1fr";
+    tr.style.gap="6px";
+
+    const fecha=new Date(it.fechaISO+"T00:00:00").toLocaleDateString();
+    const calTxt = it.calif ? (it.calif==="aprobado"?"Aprobado":"Desaprobado") : "—";
+    const calCls = it.calif==="aprobado"?"ok": it.calif==="desaprobado"?"bad":"";
+
+    tr.innerHTML = `
+      <div class="cell">
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <span class="badge ${tone}">${item.estado}</span>
-          <span class="note">${escapeHtml(item.titulo)}</span>
+          <span class="badge ${tone(it)}">${it.estado}</span>
+          <strong>${escapeHtml(it.titulo)}</strong>
         </div>
-        <div class="muted">${escapeHtml(getMateria(item.materiaId)?.nombre||"—")} • ${escapeHtml(item.tipo)}</div>
+        <div class="label" style="text-transform:none">${escapeHtml(getMateria(it.materiaId)?.nombre||"—")} • ${escapeHtml(it.tipo)}</div>
       </div>
-      <div style="font-size:14px">${fecha.toLocaleDateString()}</div>
-      <div class="${calCls}">${calTxt}</div>
-      <div>
-        <select data-action="estado" data-id="${item.id}" class="select">
-          <option value="pendiente" ${item.estado==='pendiente'?'selected':''}>Pendiente</option>
-          <option value="entregado" ${item.estado==='entregado'?'selected':''}>Entregado</option>
-          <option value="corregido" ${item.estado==='corregido'?'selected':''}>Corregido</option>
+      <div class="cell">${fecha}</div>
+      <div class="cell hide-m ${calCls}">${calTxt}</div>
+      <div class="cell">
+        <select data-act="estado" data-id="${it.id}" class="select">
+          <option value="pendiente" ${it.estado==='pendiente'?'selected':''}>Pendiente</option>
+          <option value="entregado" ${it.estado==='entregado'?'selected':''}>Entregado</option>
+          <option value="corregido" ${it.estado==='corregido'?'selected':''}>Corregido</option>
         </select>
       </div>
-      <div>
-        <select data-action="calif" data-id="${item.id}" class="select">
-          <option value="" ${!item.calif?'selected':''}>—</option>
-          <option value="aprobado" ${item.calif==='aprobado'?'selected':''}>Aprobado</option>
-          <option value="desaprobado" ${item.calif==='desaprobado'?'selected':''}>Desaprobado</option>
+      <div class="cell">
+        <select data-act="calif" data-id="${it.id}" class="select">
+          <option value="" ${!it.calif?'selected':''}>—</option>
+          <option value="aprobado" ${it.calif==='aprobado'?'selected':''}>Aprobado</option>
+          <option value="desaprobado" ${it.calif==='desaprobado'?'selected':''}>Desaprobado</option>
         </select>
-      </div>`;
-    list.appendChild(el);
+      </div>
+    `;
+    wrap.appendChild(tr);
   });
-  list.querySelectorAll("select[data-action='estado']").forEach(sel=>{
-    sel.addEventListener("change", e=>{
-      const it=state.items.find(x=>x.id===e.target.getAttribute("data-id")); if(it){ it.estado=e.target.value; save(); render(); }
-    });
+
+  // listeners
+  wrap.querySelectorAll("select[data-act='estado']").forEach(s=>{
+    s.onchange = e=>{
+      const it = state.items.find(x=>x.id===e.target.dataset.id);
+      if(it){ it.estado = e.target.value; renderLista(); }
+    }
   });
-  list.querySelectorAll("select[data-action='calif']").forEach(sel=>{
-    sel.addEventListener("change", e=>{
-      const it=state.items.find(x=>x.id===e.target.getAttribute("data-id")); if(it){ it.calif=e.target.value||null; save(); render(); }
-    });
+  wrap.querySelectorAll("select[data-act='calif']").forEach(s=>{
+    s.onchange = e=>{
+      const it = state.items.find(x=>x.id===e.target.dataset.id);
+      if(it){ it.calif = e.target.value || null; renderLista(); }
+    }
   });
 }
-function render(){ renderChips(); renderMateriaSelect(); renderList(); }
+function render(){ renderMaterias(); renderSelect(); renderLista(); }
 
-/* ===== Eventos ===== */
-$("#btnCrearMateria").addEventListener("click", ()=>{
-  const inp=$("#newMateriaInput"); const nombre=(inp.value||"").trim(); if(!nombre){ inp.focus(); return; }
-  const m={id:uid(), nombre}; state.materias.push(m); save(); state.ui.materiaActiva=m.id; inp.value=""; render();
-});
-$("#btnRenombrarMateria").addEventListener("click", ()=>{
+/* ===== Acciones ===== */
+$("#btnCrearMateria").onclick=()=>{
+  const v=$("#materiaNueva").value.trim(); if(!v) return;
+  const m={id:uid(), nombre:v}; state.materias.push(m); state.ui.materiaActiva=m.id;
+  $("#materiaNueva").value=""; render();
+};
+$("#btnRenombrar").onclick=()=>{
   if(state.ui.materiaActiva==="all") return;
   const m=getMateria(state.ui.materiaActiva); if(!m) return;
-  const nombre=$("#editMateriaInput").value.trim(); if(!nombre) return;
-  m.nombre=nombre; save(); render();
-});
-$("#btnBorrarMateria").addEventListener("click", ()=>{
+  const v=$("#materiaEdit").value.trim(); if(!v) return;
+  m.nombre=v; render();
+};
+$("#btnBorrar").onclick=()=>{
   if(state.ui.materiaActiva==="all") return;
   const id=state.ui.materiaActiva;
   state.materias = state.materias.filter(m=>m.id!==id);
   state.items    = state.items.filter(i=>i.materiaId!==id);
-  state.ui.materiaActiva="all"; save(); render();
-});
-$("#btnAgregar").addEventListener("click", ()=>{
-  const materiaId=$("#itemMateria").value;
-  const titulo=$("#itemTitulo").value.trim();
-  const tipo=$("#itemTipo").value;
-  const fechaISO=$("#itemFecha").value;
-  const calif=$("#itemCalif").value || null;
-  const estado=$("#itemEstado").value;
+  state.ui.materiaActiva="all"; render();
+};
+$("#btnAgregar").onclick=()=>{
+  const materiaId=$("#itMateria").value, titulo=$("#itTitulo").value.trim(),
+        tipo=$("#itTipo").value, fechaISO=$("#itFecha").value,
+        calif=$("#itCalif").value||null, estado=$("#itEstado").value;
   if(!materiaId || !titulo || !fechaISO){ alert("Completá Materia, Título y Fecha."); return; }
-  state.items.push({ id:uid(), materiaId, titulo, tipo, fechaISO, calif, estado });
-  save(); $("#itemTitulo").value=""; $("#itemCalif").value=""; render();
-});
+  state.items.push({id:uid(), materiaId, titulo, tipo, fechaISO, calif, estado});
+  $("#itTitulo").value=""; $("#itCalif").value="";
+  render();
+};
+$("#btnGuardar").onclick=()=>{ save(); toast(); };
 
-/* Backup (descargar) y Restaurar */
-$("#btnBackup").addEventListener("click", ()=>{
-  const data = JSON.stringify({materias: state.materias, items: state.items}, null, 2);
-  const blob = new Blob([data], {type:"application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url; a.download = "tracker-parciales-tps-backup.json"; a.click();
-  URL.revokeObjectURL(url);
-});
-$("#fileImport").addEventListener("change", (e)=>{
-  const f=e.target.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload = ev=>{
-    try{
-      const p=JSON.parse(String(ev.target.result||""));
-      if(p.materias && p.items){
-        state.materias=p.materias; state.items=p.items;
-        save(); render();
-      } else alert("Archivo inválido");
-    }catch{ alert("No se pudo leer el archivo"); }
-  };
-  r.readAsText(f);
-});
-
-/* Tema claro/oscuro manual */
+/* Tema */
 const html=document.documentElement;
 $("#btnLight").onclick=()=>{ html.setAttribute("data-theme","light"); };
 $("#btnDark").onclick =()=>{ html.setAttribute("data-theme","dark"); };
 
+/* Helpers */
+function escapeHtml(s){return String(s).replace(/[&<>"']/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]||ch));}
+
 /* Init */
 load();
-$("#itemFecha").value=new Date().toISOString().slice(0,10);
+$("#itFecha").value = new Date().toISOString().slice(0,10);
 render();
 </script>
 </body>
 </html>
-
