@@ -21,7 +21,6 @@
 
   *{box-sizing:border-box}
   html,body{margin:0;background:var(--bg);color:var(--text);font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial}
-  /* Header */
   header{
     position:sticky;top:0;z-index:20;border-bottom:1px solid var(--border);
     background:linear-gradient(180deg, rgba(14,165,233,.16), transparent), color-mix(in oklab, var(--card) 80%, transparent);
@@ -30,7 +29,6 @@
   .wrap{max-width:1100px;margin:0 auto;padding:14px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
   h1{margin:0;font-size:20px;font-weight:800;letter-spacing:-.3px;display:flex;gap:10px;align-items:center}
   h1 .dot{width:10px;height:10px;border-radius:999px;background:var(--brand);box-shadow:0 0 0 4px color-mix(in oklab, var(--brand) 28%, transparent)}
-  /* Buttons / chips */
   .row-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .btn{appearance:none;border:1px solid var(--border);background:var(--card);color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer;transition:.18s;font-weight:600}
   .btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(2,6,23,.08)}
@@ -40,11 +38,9 @@
   .toggle{border:1px solid var(--border);background:var(--card);padding:8px 12px;border-radius:999px}
   .toggle button{border:none;background:none;color:var(--muted);font-weight:700;cursor:pointer}
   .toggle button.active{color:var(--brand)}
-  /* Layout */
   .container{max-width:1100px;margin:0 auto;padding:18px 16px}
   .layout{display:grid;grid-template-columns:1fr;gap:16px}
   @media (min-width:980px){ .layout{grid-template-columns:340px 1fr} }
-  /* Cards & inputs */
   .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
   .h2{margin:0 0 12px 0;font-size:16px;font-weight:800;letter-spacing:.2px}
   .label{font-size:12px;font-weight:800;letter-spacing:.25px;color:var(--muted);text-transform:uppercase}
@@ -54,14 +50,13 @@
   .chip{border:1px solid var(--border);border-radius:999px;padding:7px 13px;font-size:13px;background:var(--card);cursor:pointer;transition:.18s}
   .chip:hover{box-shadow:0 4px 10px rgba(2,6,23,.06)}
   .chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
-  /* Listado */
   .list{display:grid;gap:12px}
   .item{
     display:grid;grid-template-columns:1fr;gap:12px;align-items:center;
     border:1px solid var(--border);border-radius:16px;padding:14px;
     background:linear-gradient(180deg, rgba(255,255,255,.03), transparent);
   }
-  @media (min-width:820px){ .item{grid-template-columns:minmax(0,1.2fr) 140px 120px 170px 160px} }
+  @media (min-width:820px){ .item{grid-template-columns:minmax(0,1.2fr) 180px 150px 190px 180px} }
   .muted{color:var(--muted)}
   .badge{display:inline-block;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid var(--border)}
   .tone-green{background:color-mix(in oklab, var(--ok) 18%, transparent); color:var(--ok); border-color:color-mix(in oklab, var(--ok) 45%, transparent)}
@@ -73,7 +68,6 @@
   .calif.desaprobado{color:var(--bad)}
   .right{display:flex;justify-content:flex-end;margin-top:8px}
   .note{font-weight:800}
-  #saveStatus{white-space:nowrap}
 </style>
 </head>
 <body>
@@ -85,17 +79,10 @@
           <button id="btnLight">Claro</button> ·
           <button id="btnDark">Oscuro</button>
         </div>
-
         <button id="btnBackup" class="btn">💾 Guardar (descargar)</button>
         <label class="btn filelbl">⤴️ Restaurar
           <input id="fileImport" type="file" accept="application/json" hidden>
         </label>
-
-        <span id="saveStatus" class="muted" style="padding:8px 10px;border:1px solid var(--border);border-radius:999px">
-          Guardado local
-        </span>
-
-        <a class="btn brand" href="#form">+ Agregar</a>
       </div>
     </div>
   </header>
@@ -175,48 +162,17 @@
 
 <script>
 /* ===== Estado & utilidades ===== */
-const LSK="tracker-parciales-tps-pretty-v5";
+const LSK="tracker-parciales-tps-pretty-v6";
 const Estado={PENDIENTE:"pendiente", ENTREGADO:"entregado", CORREGIDO:"corregido"};
 const $=s=>document.querySelector(s);
 
-const state={materias:[], items:[], ui:{materiaActiva:"all", busqueda:"", estado:"all", orden:"proxima"}};
-
-let lastDownloadTs = null; // hora de último backup descargado
-let dirty = false;         // hay cambios desde el último backup?
+const state={materias:[], items:[], ui:{materiaActiva:"all"}};
 
 function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4); }
-function hhmm(){ return new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
-function updateSaveStatus(){
-  const el=$("#saveStatus"); if(!el) return;
-  if (lastDownloadTs) el.textContent = `Copia descargada ${lastDownloadTs}`;
-  else el.textContent = dirty ? "Cambios sin copia" : "Guardado local";
-}
-function save(){
-  try{
-    localStorage.setItem(LSK, JSON.stringify({materias:state.materias, items:state.items}));
-    dirty = true;            // hay cambios nuevos desde el último backup descargado
-    updateSaveStatus();
-  }catch{}
-}
-function load(){
-  try{
-    const raw=localStorage.getItem(LSK);
-    if(raw){
-      const d=JSON.parse(raw);
-      if(d.materias && d.items){ state.materias=d.materias; state.items=d.items; }
-    }
-  }catch{}
-}
+function save(){ try{ localStorage.setItem(LSK, JSON.stringify({materias:state.materias, items:state.items})); }catch{} }
+function load(){ try{ const raw=localStorage.getItem(LSK); if(raw){ const d=JSON.parse(raw); if(d.materias&&d.items){ state.materias=d.materias; state.items=d.items; }}}catch{} }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]||ch)); }
 function getMateria(id){ return state.materias.find(m=>m.id===id); }
-function daysLabel(fechaISO){
-  const hoy=new Date(); hoy.setHours(0,0,0,0);
-  const f=new Date(fechaISO+"T00:00:00"); f.setHours(0,0,0,0);
-  const d=Math.ceil((f-hoy)/(1000*60*60*24));
-  if(d<0) return "Venció: "+Math.abs(d)+" día(s)";
-  if(d===0) return "Es hoy";
-  return "Falta: "+d+" día(s)";
-}
 function badgeTone(item){
   const today=new Date(); today.setHours(0,0,0,0);
   const fecha=new Date(item.fechaISO+"T00:00:00");
@@ -272,10 +228,7 @@ function renderList(){
         </div>
         <div class="muted">${escapeHtml(getMateria(item.materiaId)?.nombre||"—")} • ${escapeHtml(item.tipo)}</div>
       </div>
-      <div>
-        <div style="font-size:14px">${fecha.toLocaleDateString()}</div>
-        <div class="muted" style="font-size:12px">${daysLabel(item.fechaISO)}</div>
-      </div>
+      <div style="font-size:14px">${fecha.toLocaleDateString()}</div>
       <div class="${calCls}">${calTxt}</div>
       <div>
         <select data-action="estado" data-id="${item.id}" class="select">
@@ -304,7 +257,7 @@ function renderList(){
     });
   });
 }
-function render(){ renderChips(); renderMateriaSelect(); renderList(); updateSaveStatus(); }
+function render(){ renderChips(); renderMateriaSelect(); renderList(); }
 
 /* ===== Eventos ===== */
 $("#btnCrearMateria").addEventListener("click", ()=>{
@@ -342,13 +295,8 @@ $("#btnBackup").addEventListener("click", ()=>{
   const blob = new Blob([data], {type:"application/json"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url;
-  a.download = "tracker-parciales-tps-backup.json";
-  a.click();
+  a.href = url; a.download = "tracker-parciales-tps-backup.json"; a.click();
   URL.revokeObjectURL(url);
-  lastDownloadTs = hhmm();
-  dirty = false;
-  updateSaveStatus();
 });
 $("#fileImport").addEventListener("change", (e)=>{
   const f=e.target.files[0]; if(!f) return;
@@ -358,7 +306,7 @@ $("#fileImport").addEventListener("change", (e)=>{
       const p=JSON.parse(String(ev.target.result||""));
       if(p.materias && p.items){
         state.materias=p.materias; state.items=p.items;
-        save(); dirty = true; updateSaveStatus(); render();
+        save(); render();
       } else alert("Archivo inválido");
     }catch{ alert("No se pudo leer el archivo"); }
   };
